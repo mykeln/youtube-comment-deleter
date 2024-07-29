@@ -20,18 +20,20 @@ function simulateClick(element) {
     element.dispatchEvent(event);
 }
 
-// Function to wait for the deletion confirmation before proceeding
+// Function to wait for the deletion confirmation to appear and then disappear
 function waitForDeletionConfirmation(next) {
+    let lastSeen = Date.now();
     const checkExistence = setInterval(() => {
         const confirmation = Array.from(document.querySelectorAll('div')).find(div => div.textContent.includes('1 item deleted'));
         if (confirmation) {
-            console.log('Confirmation found, deleting next comment.');
+            console.log('Confirmation found.');
+            lastSeen = Date.now(); // Update last seen time
+        } else if (Date.now() - lastSeen > 1000) { // Wait for 1 second after last seen
+            console.log('Confirmation gone, proceeding.');
             clearInterval(checkExistence);
             next();
-        } else {
-            console.log('Waiting for deletion confirmation...');
         }
-    }, 500); // Check every 500 milliseconds
+    }, 100); // Check every 100 milliseconds
 }
 
 // Delete all comments
@@ -40,7 +42,7 @@ function deleteComments() {
     const deleteButtons = Array.from(document.querySelectorAll('svg')).filter(svg => {
         const path = svg.querySelector('path');
         return path && path.getAttribute('d') === "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z";
-    }).map(svg => svg.parentNode); // Assume the SVG is directly inside the button
+    }).map(svg => svg.closest('button')); // Get the closest button ancestor
 
     let index = 0; // To keep track of the current button being processed
 
