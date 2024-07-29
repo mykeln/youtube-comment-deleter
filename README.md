@@ -10,63 +10,39 @@ YouTube doesn't provide an easy way to bulk-delete your comments without deletin
 
 
 ```
-// Function to simulate a click event
 function simulateClick(element) {
-    const event = new MouseEvent('click', {
-        view: window,
+    const evt = new MouseEvent('click', {
         bubbles: true,
-        cancelable: true
+        cancelable: true,
+        view: window
     });
-    element.dispatchEvent(event);
+    element.dispatchEvent(evt);
 }
 
-// Function to wait for the deletion confirmation to appear and then disappear
-function waitForDeletionConfirmation(next) {
-    let lastSeen = Date.now();
-    const checkExistence = setInterval(() => {
-        const confirmation = Array.from(document.querySelectorAll('div')).find(div => div.textContent.includes('1 item deleted'));
-        if (confirmation) {
-            console.log('Confirmation found.');
-            lastSeen = Date.now(); // Update last seen time
-        } else if (Date.now() - lastSeen > 1000) { // Wait for 1 second after last seen
-            console.log('Confirmation gone, proceeding.');
-            clearInterval(checkExistence);
-            next();
-        }
-    }, 100); // Check every 100 milliseconds
+function delay(time) {
+    return new Promise(resolve => setTimeout(resolve, time));
 }
 
-// Delete all comments
-function deleteComments() {
-    // Select all the delete buttons based on the SVG path within them
+async function deleteComments() {
     const deleteButtons = Array.from(document.querySelectorAll('svg')).filter(svg => {
         const path = svg.querySelector('path');
         return path && path.getAttribute('d') === "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z";
-    }).map(svg => svg.closest('button')); // Get the closest button ancestor
+    }).map(svg => svg.closest('button'));
 
-    let index = 0; // To keep track of the current button being processed
+    console.log(`Found ${deleteButtons.length} delete buttons.`);
 
-    function processNextButton() {
-        if (index < deleteButtons.length) {
-            simulateClick(deleteButtons[index++]);
-            waitForDeletionConfirmation(processNextButton);
-        } else {
-            console.log('Finished deleting comments or no more delete buttons found.');
-            // Check for the next page
-            const nextPageButton = document.querySelector('[aria-label="Next page"]');
-            if (nextPageButton) {
-                console.log('Moving to next page of comments...');
-                simulateClick(nextPageButton);
-                setTimeout(deleteComments, 3000); // Wait for page to load
-            }
-        }
+    for (let button of deleteButtons) {
+        console.log('Attempting to click delete button...');
+        simulateClick(button);
+        await delay(4000);  // Wait for 3 seconds after each delete click
+        console.log('Waited 3 seconds, moving to next.');
     }
 
-    processNextButton();
+    console.log('Finished processing all deletions.');
 }
 
-// Start deleting comments
 deleteComments();
+
 ```
 
 ## How it works
