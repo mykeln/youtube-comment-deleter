@@ -2,11 +2,16 @@
 
 YouTube doesn't provide an easy way to bulk-delete your comments without deleting your entire account. This script solves that.
 
+## Dates
+- Confirmed working as of July 29, 2024. Deleted 7 years worth of comments.
+
 ## How to use
 1. Go to https://www.youtube.com/feed/history
 2. On the right-hand side under "Manage all history", click Comments
 3. Open a browser console
 4. Paste the following code, press [Enter], and let 'er rip!
+
+NOTE: You may need to refresh/repeat the steps a few times.
 
 
 ```
@@ -34,7 +39,7 @@ async function deleteComments() {
     for (let button of deleteButtons) {
         console.log('Attempting to click delete button...');
         simulateClick(button);
-        await delay(4000);  // Wait for 3 seconds after each delete click
+        await delay(4000);  // Wait for 4 seconds after each delete click
         console.log('Waited 3 seconds, moving to next.');
     }
 
@@ -46,4 +51,4 @@ deleteComments();
 ```
 
 ## How it works
-The issue with the other bulk-deleters is they just spam-simulate a "delete click." But if you refresh the page, you can see the comments weren't actually deleted. This script waits for the YouTube callback that confirms the actual comment deletion before continuing to the next comment. 
+The issue with the other bulk-deleters is they just spam-simulate a "delete click." But if you refresh the page, you can see the comments weren't actually deleted. This script waits for a bit to allow the deletion to complete before continuing to the next comment. 
